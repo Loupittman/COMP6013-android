@@ -157,7 +157,7 @@ class MainFragment : Fragment() {
                 }
             }
         })
-        viewModel.modelDownloading.observe(viewLifecycleOwner, Observer { isDownloading ->
+        viewModel.dataLoading.observe(viewLifecycleOwner, Observer { isDownloading ->
             progressBar.visibility = if (isDownloading) {
                 View.VISIBLE
             } else {
