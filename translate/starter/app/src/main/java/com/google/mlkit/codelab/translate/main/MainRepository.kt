@@ -1,10 +1,12 @@
 package com.google.mlkit.codelab.translate.main
 
 import android.util.Log
+import androidx.lifecycle.MediatorLiveData
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.*
+import com.google.mlkit.codelab.translate.util.ResultOrError
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -27,14 +29,31 @@ data class Container(
 
 class MainRepository {
     companion object {
-        private val base = "http://127.0.0.1:5000/"
+        private val base = "https://127.0.0.1:5000/container/"
 
-        fun getContainer(container_id: String?): Container? {
-            if (container_id.isNullOrEmpty()) return null
+        private const val TAG = "Containers"
 
-            val url = base + container_id
+        fun getContainer(container_id: String?, location: MediatorLiveData<ResultOrError>) {
+            if (container_id.isNullOrEmpty()) {
+                return
 
-            var container: Container? = null
+            }
+
+            val stripped = container_id.filterNot { it.isWhitespace() }
+            Log.d(TAG, "candidate container ID is: $stripped")
+
+            val reg = Regex("[\\d]{7}")
+            if (!reg.containsMatchIn(stripped)) {
+                Log.d(TAG, "invalid container_id: $container_id")
+                return
+
+            }
+
+            val match = reg.find(stripped)
+            val candidate = match?.value
+            Log.d(TAG, "valid candidate container_id: $candidate")
+
+            val url = base + candidate
 
             // Set up the network to use HttpURLConnection as the HTTP client.
             val network = BasicNetwork(HurlStack())
@@ -48,10 +67,10 @@ class MainRepository {
                 url,
                 { response ->
                     val data = response.toString()
-                    var json = JSONObject(data)
-                    container = Container(
+                    val json = JSONObject(data)
+                    val container = Container(
                         container_id = json.getString("container_id"),
-                        type = json.getString(""),
+                        type = json.getString("type"),
                         description = json.getString("description"),
                         vle = json.getString("vle"),
                         model_mix = json.getString("model_mix"),
@@ -65,14 +84,15 @@ class MainRepository {
                         haulier_id = json.getString("haulier_id"),
                         load_unit_id = json.getString("load_unit_id")
                     )
+                    Log.d(TAG, "JSON received: ${json.toString()}")
+                    location.value = ResultOrError(container.description, null)
                 },
                 {
-                    Log.d("Containers", "VolleyError: " + it.toString())
+                    Log.d(TAG, "VolleyError: ${it.toString()}")
                 }
             )
+            Log.d(TAG, "queuing request for URL: $url")
             requestQueue.add(request)
-
-            return container
         }
     }
 }

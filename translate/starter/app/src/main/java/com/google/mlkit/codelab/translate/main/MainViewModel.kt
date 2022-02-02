@@ -18,6 +18,7 @@
 package com.google.mlkit.codelab.translate.main
 
 import android.app.Application
+import android.nfc.Tag
 import android.util.Log
 import android.util.LruCache
 import androidx.lifecycle.AndroidViewModel
@@ -38,12 +39,14 @@ import com.google.mlkit.nl.translate.TranslatorOptions
 import com.google.mlkit.codelab.translate.main.MainFragment.Companion.DESIRED_HEIGHT_CROP_PERCENT
 import com.google.mlkit.codelab.translate.main.MainFragment.Companion.DESIRED_WIDTH_CROP_PERCENT
 
+const val TAG = "Containers"
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val languageIdentifier = LanguageIdentification.getClient()
     val targetLang = MutableLiveData<Language>()
     val sourceText = SmoothedMutableLiveData<String>(SMOOTHING_DURATION)
+
 
     // We set desired crop percentages to avoid having to analyze the whole image from the live
     // camera feed. However, we are not guaranteed what aspect ratio we will get from the camera, so
@@ -146,13 +149,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 //            }
 //        // Start translation if any of the following change: detected text, source lang, target lang.
         translatedText.addSource(sourceText) {
-            Log.d("Containers", "sourceText has changed: " + sourceText.value)
+            Log.d(TAG, "sourceText has changed: " + sourceText.value)
             if (!sourceText.value.isNullOrBlank()) {
-                Log.d("Containers", "Container: " + MainRepository.getContainer(sourceText.value).toString())
-                translatedText.value = ResultOrError(
-                    MainRepository.getContainer(sourceText.value).toString(),
-                    null
-                )
+                Log.d(TAG, "Container: ")
+                MainRepository.getContainer(sourceText.value, translatedText)
             }
         }
 //        translatedText.addSource(sourceLang) { translate().addOnCompleteListener(processTranslation) }
