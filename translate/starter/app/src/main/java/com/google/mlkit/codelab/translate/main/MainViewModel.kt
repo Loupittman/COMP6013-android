@@ -1,20 +1,3 @@
-/*
- * Copyright 2020 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-
 package com.google.mlkit.codelab.translate.main
 
 import android.app.Application
@@ -39,7 +22,7 @@ import com.google.mlkit.nl.translate.TranslatorOptions
 import com.google.mlkit.codelab.translate.main.MainFragment.Companion.DESIRED_HEIGHT_CROP_PERCENT
 import com.google.mlkit.codelab.translate.main.MainFragment.Companion.DESIRED_WIDTH_CROP_PERCENT
 
-const val TAG = "Containers"
+private const val TAG = "Containers"
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -149,10 +132,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 //            }
 //        // Start translation if any of the following change: detected text, source lang, target lang.
         translatedText.addSource(sourceText) {
-            Log.d(TAG, "sourceText has changed: " + sourceText.value)
-            if (!sourceText.value.isNullOrBlank()) {
-                Log.d(TAG, "Container: ")
-                MainRepository.getContainer(sourceText.value, translatedText)
+            Log.d(TAG, "sourceText has changed: $it")
+            if (it.isNotBlank()) {
+                MainRepository.getContainer(it, translatedText)
             }
         }
 //        translatedText.addSource(sourceLang) { translate().addOnCompleteListener(processTranslation) }

@@ -4,13 +4,13 @@ import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import com.android.volley.Request
 import com.android.volley.RequestQueue
-import com.android.volley.Response
 import com.android.volley.toolbox.*
 import com.google.mlkit.codelab.translate.util.ResultOrError
-import org.json.JSONArray
 import org.json.JSONObject
 
-data class Container(
+private const val TAG = "Containers"
+
+class Container(
     val container_id : String,
     val type : String,
     val description : String,
@@ -25,35 +25,36 @@ data class Container(
     val weight : String,
     val haulier_id : String,
     val load_unit_id : String
-)
-
-class MainRepository {
+) {
     companion object {
-        private val base = "https://127.0.0.1:5000/container/"
-
-        private const val TAG = "Containers"
-
-        fun getContainer(container_id: String?, location: MediatorLiveData<ResultOrError>) {
-            if (container_id.isNullOrEmpty()) {
-                return
-
-            }
-
+        fun extractContainerID(container_id: String): String {
             val stripped = container_id.filterNot { it.isWhitespace() }
             Log.d(TAG, "candidate container ID is: $stripped")
 
             val reg = Regex("[\\d]{7}")
             if (!reg.containsMatchIn(stripped)) {
                 Log.d(TAG, "invalid container_id: $container_id")
-                return
+                return ""
 
             }
 
             val match = reg.find(stripped)
             val candidate = match?.value
             Log.d(TAG, "valid candidate container_id: $candidate")
+            return candidate!!
+        }
+    }
+}
 
-            val url = base + candidate
+class MainRepository {
+    companion object {
+        private const val BASE = "https://127.0.0.1:5000/container/"
+
+        fun getContainer(container_id: String, location: MediatorLiveData<ResultOrError>) {
+            val candidate: String = Container.extractContainerID(container_id)
+            if (candidate.isEmpty()) return
+
+            val url = BASE + candidate
 
             // Set up the network to use HttpURLConnection as the HTTP client.
             val network = BasicNetwork(HurlStack())
