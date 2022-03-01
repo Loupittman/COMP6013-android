@@ -141,12 +141,12 @@ class MainFragment : Fragment() {
             }
         })
         viewModel.dataLoading.observe(viewLifecycleOwner, Observer { isDownloading ->
-            progressBar.visibility = if (isDownloading) {
-                View.VISIBLE
-            } else {
-                View.INVISIBLE
-            }
-            progressText.visibility = progressBar.visibility
+//            progressBar.visibility = if (isDownloading) {
+//                View.VISIBLE
+//            } else {
+//                View.INVISIBLE
+//            }
+//            progressText.visibility = progressBar.visibility
         })
 
         overlay.apply {
